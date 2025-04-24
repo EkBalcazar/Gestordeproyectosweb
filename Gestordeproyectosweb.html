@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gestor de Proyectos 2025</title>
+
+<!-- Bulma CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" />
+
+<!-- Ionic Icons -->
+<link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css" />
+
+<!-- Hover.css -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/hover.css/2.3.1/css/hover-min.css"/>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Moment.js -->
+<script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+
+<style>
+  /* Estilos personalizados para fondo, bordes redondeados, sombras y colores suaves */
+  body {
+    background-image: url('https://images.unsplash.com/photo-1581090700227-4a3267f2ab94?ixlib=rb-4.0.1&auto=format&fit=crop&w=1950&q=80'); /* Imagen relacionada */
+    background-size: cover;
+    background-attachment: fixed;
+    font-family: 'Lato', sans-serif;
+    color: #333;
+  }
+  .content-container {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin: 2rem auto;
+    max-width: 1200px;
+    padding: 2rem;
+  }
+  /* Otros estilos para botones, tarjetas, gráficos, etc. */
+</style>
+</head>
+<body>
+
+<!-- Cabecera con portada y título -->
+<section class="section has-background-light is-rounded">
+  <div class="container has-text-centered">
+    <h1 class="title is-2 mb-4">Gestor de Proyectos 2025</h1>
+    <img src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?ixlib=rb-4.0.1&auto=format&fit=crop&w=1950&q=80" alt="Proyectos" class="hover:grow" style="max-height:200px;">
+    <p class="subtitle is-5 mt-3">Panel para visualizar, gestionar y presentar los avances de los proyectos empresariales durante 2025</p>
+  </div>
+</section>
+
+<!-- Menú o navegación -->
+<nav class="navbar is-info" role="navigation" aria-label="main navigation">
+  <div class="navbar-menu is-active">
+    <div class="navbar-start">
+      <a class="navbar-item" id="btnResumen">Resumen mensual</a>
+      <a class="navbar-item" id="btnAvances">Proyectos en curso</a>
+      <a class="navbar-item" id="btnTerminados">Proyectos terminados</a>
+      <a class="navbar-item" id="btnCompartir">Compartir/Descargar</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Contenedor principal para contenido dinámico -->
+<div class="content-container" id="mainContent">
+  <!-- Aquí se cargarán las vistas: resumen, gráficos, tablas, etc. -->
+</div>
+
+<!-- Scripts -->
+<script>
+  // Datos ejemplo para proyectos
+  const proyectos = [
+    {
+      id: 1,
+      nombre: "Implementación CRM",
+      estado: "En curso",
+      mesInicio: 1,
+      mesFin: 4,
+      avance: [10, 30, 50, 70],
+      descripcion: "Desarrollo e implementación del sistema CRM para ventas.",
+    },
+    {
+      id: 2,
+      nombre: "Campaña Marketing Q2",
+      estado: "Terminado",
+      mesInicio: 4,
+      mesFin: 6,
+      avance: [20, 50, 80],
+      descripcion: "Campaña de marketing para productos nuevos.",
+    },
+    // Agrega más proyectos
+  ];
+
+  // Función para mostrar resumen mensual
+  function mostrarResumen() {
+    const container = document.getElementById('mainContent');
+    container.innerHTML = '';
+
+    // Crear tabla de meses
+    let html = `
+      <h2 class="title is-4 has-text-centered mb-4">Resumen mensual 2025</h2>
+      <div class="columns is-multiline">
+    `;
+
+    for(let mes=1; mes<=12; mes++) {
+      html += `
+        <div class="column is-one-quarter">
+          <div class="card">
+            <div class="card-content">
+              <p class="title is-5">${moment().month(mes-1).format('MMMM')}</p>
+              <ul>
+      `;
+
+      // Filtrar proyectos en ese mes
+      const proyectosEnMes = proyectos.filter(p => p.mesInicio <= mes && p.mesFin >= mes);
+      proyectosEnMes.forEach(p => {
+        html += `<li><strong>${p.nombre}</strong> - ${p.estado}</li>`;
+      });
+
+      html += `
+              </ul>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    html += `</div>`;
+    container.innerHTML = html;
+  }
+
+  // Función para mostrar gráficos de progreso
+  function mostrarAvances() {
+    const container = document.getElementById('mainContent');
+    container.innerHTML = `
+      <h2 class="title is-4 has-text-centered mb-4">Progreso de proyectos en curso</h2>
+      <canvas id="progresoChart" height="400"></canvas>
+    `;
+
+    // Datos para Chart.js
+    const ctx = document.getElementById('progresoChart').getContext('2d');
+
+    const datasets = proyectos.filter(p => p.estado === 'En curso').map((p, index) => {
+      return {
+        label: p.nombre,
+        data: p.avance,
+        fill: false,
+        borderColor: `hsl(${index * 60}, 70%, 50%)`,
+        tension: 0.4
+      };
+    });
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: Array.from({length: 12}, (_,i) => moment().month(i).format('MMM')),
+        datasets: datasets
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom' }
+        }
+      }
+    });
+  }
+
+  // Función para mostrar proyectos terminados
+  function mostrarTerminados() {
+    const container = document.getElementById('mainContent');
+    let html = `
+      <h2 class="title is-4 has-text-centered mb-4">Proyectos terminados 2025</h2>
+      <table class="table is-striped is-fullwidth">
+        <thead>
+          <tr>
+            <th>Proyecto</th>
+            <th>Mes Inicio</th>
+            <th>Mes Fin</th>
+            <th>Avance Final</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+    proyectos.filter(p => p.estado === 'Terminado').forEach(p => {
+      html += `
+        <tr>
+          <td>${p.nombre}</td>
+          <td>${moment().month(p.mesInicio-1).format('MMMM')}</td>
+          <td>${moment().month(p.mesFin-1).format('MMMM')}</td>
+          <td>${p.avance[p.avance.length - 1]}%</td>
+          <td>
+            <button class="button is-small is-info" onclick="descargarPDF(${p.id})">PDF</button>
+            <button class="button is-small is-primary<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gestor de Proyectos 2025</title>
+
+<!-- Bulma CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" />
+
+<!-- Ionic Icons -->
+<link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css" />
+
+<!-- Hover.css -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/hover.css/2.3.1/css/hover-min.css"/>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Moment.js -->
+<script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+
+<style>
+  /* Estilos personalizados para fondo, bordes redondeados, sombras y colores suaves */
+  body {
+    background-image: url('https://images.unsplash.com/photo-1581090700227-4a3267f2ab94?ixlib=rb-4.0.1&auto=format&fit=crop&w=1950&q=80'); /* Imagen relacionada */
+    background-size: cover;
+    background-attachment: fixed;
+    font-family: 'Lato', sans-serif;
+    color: #333;
+  }
+  .content-container {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin: 2rem auto;
+    max-width: 1200px;
+    padding: 2rem;
+  }
+  /* Otros estilos para botones, tarjetas, gráficos, etc. */
+</style>
+</head>
+<body>
+
+<!-- Cabecera con portada y título -->
+<section class="section has-background-light is-rounded">
+  <div class="container has-text-centered">
+    <h1 class="title is-2 mb-4">Gestor de Proyectos 2025</h1>
+    <img src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?ixlib=rb-4.0.1&auto=format&fit=crop&w=1950&q=80" alt="Proyectos" class="hover:grow" style="max-height:200px;">
+    <p class="subtitle is-5 mt-3">Panel para visualizar, gestionar y presentar los avances de los proyectos empresariales durante 2025</p>
+  </div>
+</section>
+
+<!-- Menú o navegación -->
+<nav class="navbar is-info" role="navigation" aria-label="main navigation">
+  <div class="navbar-menu is-active">
+    <div class="navbar-start">
+      <a class="navbar-item" id="btnResumen">Resumen mensual</a>
+      <a class="navbar-item" id="btnAvances">Proyectos en curso</a>
+      <a class="navbar-item" id="btnTerminados">Proyectos terminados</a>
+      <a class="navbar-item" id="btnCompartir">Compartir/Descargar</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Contenedor principal para contenido dinámico -->
+<div class="content-container" id="mainContent">
+  <!-- Aquí se cargarán las vistas: resumen, gráficos, tablas, etc. -->
+</div>
+
+<!-- Scripts -->
+<script>
+  // Datos ejemplo para proyectos
+  const proyectos = [
+    {
+      id: 1,
+      nombre: "Implementación CRM",
+      estado: "En curso",
+      mesInicio: 1,
+      mesFin: 4,
+      avance: [10, 30, 50, 70],
+      descripcion: "Desarrollo e implementación del sistema CRM para ventas.",
+    },
+    {
+      id: 2,
+      nombre: "Campaña Marketing Q2",
+      estado: "Terminado",
+      mesInicio: 4,
+      mesFin: 6,
+      avance: [20, 50, 80],
+      descripcion: "Campaña de marketing para productos nuevos.",
+    },
+    // Agrega más proyectos
+  ];
+
+  // Función para mostrar resumen mensual
+  function mostrarResumen() {
+    const container = document.getElementById('mainContent');
+    container.innerHTML = '';
+
+    // Crear tabla de meses
+    let html = `
+      <h2 class="title is-4 has-text-centered mb-4">Resumen mensual 2025</h2>
+      <div class="columns is-multiline">
+    `;
+
+    for(let mes=1; mes<=12; mes++) {
+      html += `
+        <div class="column is-one-quarter">
+          <div class="card">
+            <div class="card-content">
+              <p class="title is-5">${moment().month(mes-1).format('MMMM')}</p>
+              <ul>
+      `;
+
+      // Filtrar proyectos en ese mes
+      const proyectosEnMes = proyectos.filter(p => p.mesInicio <= mes && p.mesFin >= mes);
+      proyectosEnMes.forEach(p => {
+        html += `<li><strong>${p.nombre}</strong> - ${p.estado}</li>`;
+      });
+
+      html += `
+              </ul>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    html += `</div>`;
+    container.innerHTML = html;
+  }
+
+  // Función para mostrar gráficos de progreso
+  function mostrarAvances() {
+    const container = document.getElementById('mainContent');
+    container.innerHTML = `
+      <h2 class="title is-4 has-text-centered mb-4">Progreso de proyectos en curso</h2>
+      <canvas id="progresoChart" height="400"></canvas>
+    `;
+
+    // Datos para Chart.js
+    const ctx = document.getElementById('progresoChart').getContext('2d');
+
+    const datasets = proyectos.filter(p => p.estado === 'En curso').map((p, index) => {
+      return {
+        label: p.nombre,
+        data: p.avance,
+        fill: false,
+        borderColor: `hsl(${index * 60}, 70%, 50%)`,
+        tension: 0.4
+      };
+    });
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: Array.from({length: 12}, (_,i) => moment().month(i).format('MMM')),
+        datasets: datasets
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom' }
+        }
+      }
+    });
+  }
+
+  // Función para mostrar proyectos terminados
+  function mostrarTerminados() {
+    const container = document.getElementById('mainContent');
+    let html = `
+      <h2 class="title is-4 has-text-centered mb-4">Proyectos terminados 2025</h2>
+      <table class="table is-striped is-fullwidth">
+        <thead>
+          <tr>
+            <th>Proyecto</th>
+            <th>Mes Inicio</th>
+            <th>Mes Fin</th>
+            <th>Avance Final</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+    proyectos.filter(p => p.estado === 'Terminado').forEach(p => {
+      html += `
+        <tr>
+          <td>${p.nombre}</td>
+          <td>${moment().month(p.mesInicio-1).format('MMMM')}</td>
+          <td>${moment().month(p.mesFin-1).format('MMMM')}</td>
+          <td>${p.avance[p.avance.length - 1]}%</td>
+          <td>
+            <button class="button is-small is-info" onclick="descargarPDF(${p.id})">PDF</button>
+            <button class="button is-small is-primary
